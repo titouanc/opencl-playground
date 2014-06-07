@@ -158,6 +158,9 @@ int main(int argc, const char **argv)
     float *img = malloc(w*h*sizeof(float));
     float x1=-2, y1=1, x2=2, y2=-1;
 
+    printf("View Mandelbrot between (%f,%f) and (%f,%f)\n", x1, y1, x2, y2);
+    printf("Render as %dx%d image\n", w, h);
+
     if (argc < 2 || strcmp(argv[1], "cpu") == 0){
         cpu_draw(img, w, h, x1, y1, x2, y2);
         puts("CPU DONE");
