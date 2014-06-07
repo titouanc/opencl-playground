@@ -1,12 +1,16 @@
 /*
  * mandelbrodt(dest, region, width)
  *     Compute the serie Zn = (Zn-1)^2 + c; Z0 = 0 at given point
- * @param dest Destination float vector
- * @param region Region to plot, given as float4 (x1, y1, x2, y2); x1<x2; y1<y2;
+ * @param dest Destination float area
+ * @param p1 One of the corner of the region to be plotted in form (real, imaginary)
+ * @param p2 The other corner in form (real, imaginary)
  * @oaram size Size of the destination, in pixels, as int2 (width, height)
  */
-__kernel void mandelbrot(__global __write_only float *dest, float2 p1, float2 p2, float2 size)
-{
+__kernel void mandelbrot(
+    __global __write_only float *dest, 
+    float2 p1, float2 p2, 
+    float2 size
+){
     int id = get_global_id(0);
     float2 c, z;
 
