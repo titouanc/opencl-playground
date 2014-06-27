@@ -2,7 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
+#if defined __APPLE__
+#include <cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 #define MAX_SOURCE_SIZE 65536
 
