@@ -1,35 +1,46 @@
-/*
- * mandelbrodt(dest, p1, p2, width)
- *     Compute the serie Zn = (Zn-1)^2 + c; Z0 = 0 at given point
- * @param dest Destination float area
- * @param p1 One of the corner of the region to be plotted in form (real, imaginary)
- * @param p2 The other corner in form (real, imaginary)
- * @oaram size Size of the destination, in pixels, as float2 (width, height)
- */
+inline float2 complex_prod(float2 z1, float2 z2)
+{
+    return (float2)(z1.x*z2.x - z1.y*z2.y, z1.x*z2.y + z1.y*z2.x);
+}
+
 __kernel void mandelbrot(
-    __global __write_only float *dest, 
-    float2 p1, float2 p2, 
-    float2 size
+    __write_only image2d_t dest, 
+    __global float2 *p1, __global float2 *p2,
+    __global float2 *size
 ){
-    int id = get_global_id(0);
+    /* x,y coordinates in dest image */
+    int2 p = (int2) (get_global_id(0), get_global_id(1));
+
+    /* Iteration variables */
     float2 c, z;
+    /* re,im in complex plane between p1 && p2 */
+    c = *p1 + ((float2) (p.x, p.y))*(*p2-*p1) / *size;
+    /* Z0 = 0 */
+    z = (float2) (0, 0);
 
-    c.s0 = id%(int)size.s0;
-    c.s1 = id/(int)size.s0;
-    c = p1 + c*(p2-p1)/size;
-
-    z.s0 = z.s1 = 0;
-
-    for (int i=0; i<100000; i++){
-        /* Complex Z^2 */
-        float re = z.s0*z.s0 - z.s1*z.s1;
-        z.s1 = 2 * z.s0 * z.s1;
-        z.s0 = re;
+    for (int i=0; i<256; i++){
+        /* z^2 */
+        z = complex_prod(z, z);
 
         /* Add c */
         z += c;
+        if (length(z) > 4.0){
+            write_imagef(dest, p, 1.0-((float) i)/256.0);
+            return;
+        }
     }
 
-    /* Complex norm */
-    dest[id] = z.s0*z.s0 + z.s1*z.s1;
+    write_imagef(dest, p, 0);
+}
+
+__kernel void mandeltest(
+    __write_only image2d_t dest, 
+    float2 p1, float2 p2,
+    float2 size
+){
+    /* x,y coordinates in dest image */
+    int2 p = (int2) (get_global_id(0), get_global_id(1));
+    float2 r = (float2) (p.x, p.y);
+
+    write_imagef(dest, p, length(r));
 }

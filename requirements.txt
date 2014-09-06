@@ -1,0 +1,4 @@
+ipython[notebook]
+numpy
+matplotlib
+pyopencl
