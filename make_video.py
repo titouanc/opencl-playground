@@ -49,22 +49,24 @@ def make_anim():
     # Start width
     w = 4.0
     # Center of zoom
-    c = (-0.403, 0.595)
+    c = (-0.4025, 0.595)
     # Resolution
-    s = (1280, 720)
+    s = (800, 450)
 
     last = time()
-    for i in range(400):
-        w -= 3*w/100
+    for i in range(500):
         frame = plt.imshow(render_mandelbrot(CENTER=c, WIDTH=w, SIZE=s))
         plt.axis('off')
         frames.append((frame, ))
+
+        render_mandelbrot(CENTER=c, WIDTH=w, SIZE=s)
 
         now = time()
         dt = now-last
         last = now
         b = borders(CENTER=c, WIDTH=w, SIZE=s)
-        print '%2d fps :: %s - %s' % (1.0/dt, b[0], b[1])
+        print '%2d fps :: %.2f seconds :: %s - %s' % (1.0/dt, float(i)/20, b[0], b[1])
+        w -= 3*w/100
 
     anim = animation.ArtistAnimation(fig, frames, interval=50, repeat_delay=3000, blit=True)
     anim.save('zoom.mp4', metadata={'artist': 'iTitou'}, bitrate=2500)
