@@ -3,6 +3,7 @@ import pyopencl as cl
 import pyopencl.array as cl_array
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import os
 from time import time
 
 ctx = cl.create_some_context()
@@ -42,34 +43,45 @@ def render_mandelbrot(CENTER=(-0.5, 0), WIDTH=4, SIZE=(1920, 1080)):
     cl.enqueue_copy(queue, displayable, image, origin=(0, 0), region=SIZE)
     return displayable
 
-def make_anim():
-    frames = []
-    fig = plt.figure()
+def make_anim(x=-0.4025, y=0.595, zoom=500):
+    movie_dirname = "movie_%f,%f:%d" % (x, y, zoom)
+    os.system("mkdir -p %s" % (movie_dirname))
+
+    start = time()
 
     # Start width
     w = 4.0
     # Center of zoom
-    c = (-0.4025, 0.595)
+    c = (x, y)
     # Resolution
-    s = (800, 450)
+    s = (1280, 720)
 
     last = time()
-    for i in range(500):
+    for i in range(zoom):
+        frame_name = "%s/frame_%05d.png" % (movie_dirname, i)
         frame = plt.imshow(render_mandelbrot(CENTER=c, WIDTH=w, SIZE=s))
         plt.axis('off')
-        frames.append((frame, ))
-
-        render_mandelbrot(CENTER=c, WIDTH=w, SIZE=s)
+        plt.savefig(frame_name, pad_inches=0, dpi=300, bbox_inches='tight')
+        plt.clf()
 
         now = time()
         dt = now-last
         last = now
         b = borders(CENTER=c, WIDTH=w, SIZE=s)
-        print '%2d fps :: %.2f seconds :: %s - %s' % (1.0/dt, float(i)/20, b[0], b[1])
+        print '[%3d] %2d fps :: %.2f seconds video/%.2f seconds rendering :: %s - %s' % (
+            i+1, 1.0/dt, float(i)/20, now-start, b[0], b[1]
+        )
         w -= 3*w/100
 
-    anim = animation.ArtistAnimation(fig, frames, interval=50, repeat_delay=3000, blit=True)
-    anim.save('zoom.mp4', metadata={'artist': 'iTitou'}, bitrate=2500)
-
 if __name__ == "__main__":
-    make_anim()
+    from sys import argv
+    if len(argv) == 1:
+        make_anim()
+    elif len(argv) >= 3:
+        x = float(argv[1])
+        y = float(argv[2])
+        make_anim(x, y)
+
+# Interesting points:
+# -0.7477855 0.1
+# -0.4025, 0.595
