@@ -1,7 +1,7 @@
 import pyopencl as cl
 import numpy as np
 import subprocess as sp
-from math import log
+from PIL import Image
 
 class Renderer:
     # OpenCL Context
